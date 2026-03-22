@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package dts;
+
+option go_package = "github.com/Gaganpreet-S1ngh/dts-proto/pb";
+
+/* Coordinator Server Services */
+
+message FinishedTaskRequest {
+    uint64 task_id = 1;
+    string data = 2;
+    
+}
+
+message FinishedTaskResponse {
+    string message = 1;
+
+}
+
+message HeartbeatRequest {
+    uint64 worker_id = 1;
+    string address = 2;
+}
+
+message HeartbeatResponse {
+    bool acknowledged = 1;
+}
+
+enum TaskStatus {
+    QUEUED = 0;
+    STARTED = 1;
+    COMPLETED = 2;
+    FAILED = 3;
+}
+message UpdateTaskStatusRequest{
+    uint64 task_id = 1;
+    TaskStatus status = 2;
+    int64 started_at = 3;
+    int64 completed_at = 4;
+    int64 failed_at = 5;
+}
+message UpdateTaskStatusResponse {
+    bool success = 1;
+}
+
+service CoordinatorService {
+    // Processes finished task submitted by the worker
+    rpc SubmitTask (FinishedTaskRequest) returns (FinishedTaskResponse) {}
+    // Processes heartbeat from the worker
+    rpc SendHeartbeat (HeartbeatRequest) returns (HeartbeatResponse) {}
+    // Updates a task status
+    rpc UpdateTaskStatus (UpdateTaskStatusRequest) returns (UpdateTaskStatusResponse) {}
+}
+
+
+
+
+/* Worker Server Services*/
+message NewTaskRequest {
+    uint64 task_id = 1;
+    string data = 2;
+}
+
+message NewTaskResponse {
+    uint64 task_id = 1;
+    string message = 2;
+    bool success = 3;
+}
+
+service WorkerService {
+    // Processes the recieved task
+    rpc ProcessTask (NewTaskRequest) returns (NewTaskResponse) {}
+}
+
+
